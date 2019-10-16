@@ -70,11 +70,10 @@ public class CustomFieldUtils implements ICustomFieldUtils {
                               CustomFieldType<?,?> customFieldType,
                               List<String> optionsForMultiSelect,
                               List<Long> projectId,
-                              Boolean isGlobal) {
+                              Boolean isGlobal) throws Exception {
         if(name == null ||
                 customFieldType == null)
-            return null;
-            //throw new Exception("")
+            throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
         Collection<CustomField> existsFields = _customFieldManager.getCustomFieldObjectsByName(name);
         if(existsFields!=null && existsFields.size() > 0)
             return existsFields.stream().findFirst().get();
@@ -92,29 +91,32 @@ public class CustomFieldUtils implements ICustomFieldUtils {
         CustomFieldDefinition newCustomField = newCustomFieldBuilder.build();
         ServiceOutcome<CreateValidationResult> validationCreate = _customFieldService.validateCreate(_user, newCustomField);
         if(!validationCreate.isValid())
-            return null;
+            throw new Exception(UtilConstaints.ERROR_CUSTOMFIELD_CREATEVALIDATEFAIL);
         ServiceOutcome<CustomField> result = _customFieldService.create(validationCreate.get());
         if(!result.isValid())
-            return null;
+            throw new Exception(UtilConstaints.ERROR_CUSTOMFIELD_CREATEFAIL);
         CustomField ret = result.get();
-        if((customFieldType.getKey().contains("multicheckboxes") || customFieldType.getKey().contains("radiobuttons")) && optionsForMultiSelect != null){
+        if((customFieldType.getKey().contains(UtilConstaints.MULTICHECKBOX_KEY) || customFieldType.getKey().contains(UtilConstaints.RADIOBUTTONS_KEY)) && optionsForMultiSelect != null){
             createOption(ret,optionsForMultiSelect);
         }
         return ret;
     }
 
     @Override
-    public CustomField update(Long customFieldId, String name, String description, CustomFieldSearcher searcher) {
+    public CustomField update(Long customFieldId, String name, String description, CustomFieldSearcher searcher) throws Exception {
         if(customFieldId < 1 ||
         name == null)
-            return null;
+            throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
         CustomField oldField = _customFieldManager.getCustomFieldObject(customFieldId);
         if(name==null)
             name = oldField.getName();
         if(description==null)
             description = oldField.getDescription();
         _customFieldManager.updateCustomField(customFieldId, name, description, null);
-        return _customFieldManager.getCustomFieldObject(customFieldId);
+        CustomField ret = _customFieldManager.getCustomFieldObject(customFieldId);
+        if(ret == null)
+            throw new Exception(UtilConstaints.ERROR_CUSTOMFIELD_UPDATEFAIL);
+        return ret;
     }
 
     @Override

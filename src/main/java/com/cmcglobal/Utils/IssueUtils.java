@@ -4,29 +4,21 @@ import com.atlassian.jira.bc.issue.IssueService;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.config.IssueTypeManager;
 import com.atlassian.jira.config.IssueTypeService;
-import com.atlassian.jira.exception.CreateException;
-import com.atlassian.jira.exception.RemoveException;
 import com.atlassian.jira.issue.*;
 import com.atlassian.jira.issue.context.JiraContextNode;
 import com.atlassian.jira.issue.context.ProjectContext;
-import com.atlassian.jira.issue.fields.ConfigurableField;
 import com.atlassian.jira.issue.fields.config.FieldConfigScheme;
 import com.atlassian.jira.issue.fields.config.manager.FieldConfigSchemeManager;
 import com.atlassian.jira.issue.fields.config.manager.IssueTypeSchemeManager;
-import com.atlassian.jira.issue.fields.screen.issuetype.IssueTypeScreenScheme;
 import com.atlassian.jira.issue.issuetype.IssueType;
 import com.atlassian.jira.issue.operation.IssueOperations;
 import com.atlassian.jira.issue.operation.ScreenableIssueOperation;
 import com.atlassian.jira.project.Project;
-import com.atlassian.jira.scheme.SchemeManager;
-import com.atlassian.jira.security.JiraAuthenticationContext;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.user.util.UserManager;
 import com.atlassian.jira.util.ErrorCollection;
 import com.atlassian.plugin.spring.scanner.annotation.export.ExportAsService;
-import com.atlassian.plugin.spring.scanner.annotation.imports.JiraImport;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,8 +70,7 @@ public class IssueUtils implements IIssueUtils {
     }
 
     @Override
-    public FieldConfigScheme AddIssueTypeSchemeToProject(FieldConfigScheme scheme ,Project project) {
-        //_issueTypeSchemeManager.addOptionToDefault();
+    public FieldConfigScheme AddIssueTypeSchemeToProject(FieldConfigScheme scheme ,Project project) throws Exception {
         JiraContextNode projectContext = new ProjectContext(project.getId());
         List<JiraContextNode> existsContextNode = scheme.getContexts();
         List<JiraContextNode> newContextNode = new ArrayList<>();
@@ -88,14 +79,17 @@ public class IssueUtils implements IIssueUtils {
             return scheme;
         newContextNode.addAll(existsContextNode);
         newContextNode.add(projectContext);
-        FieldConfigScheme ret =  _fieldConfigSchemeManager.updateFieldConfigScheme(scheme, newContextNode, scheme.getField());
-        return ret;
+        return _fieldConfigSchemeManager.updateFieldConfigScheme(scheme, newContextNode, scheme.getField());
     }
 
     @Override
-    public IssueType createIssueType(String name, String description, Long avatarId, IssueTypeService.IssueTypeCreateInput.Type type) {
+    public IssueType createIssueType(
+            String name,
+            String description,
+            Long avatarId,
+            IssueTypeService.IssueTypeCreateInput.Type type) throws Exception {
         if(name == null)
-            return null;
+            throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
         Stream<IssueType> existsTypes = _issueTypeManager.getIssueTypes().stream().filter(e->e.getName().equals(name));
         if(existsTypes != null && existsTypes.count() > 0)
             return _issueTypeManager.getIssueTypes().stream().filter(e->e.getName().equals(name)).findFirst().get();
@@ -107,26 +101,26 @@ public class IssueUtils implements IIssueUtils {
             newTypeBuilder.setDescription(description);
         IssueTypeService.CreateValidationResult validationResult = _issueTypeService.validateCreateIssueType(_user, newTypeBuilder.build());
         if (!validationResult.isValid())
-            return null;
+            throw new Exception(UtilConstaints.ERROR_ISSUETYPE_CREATEVALIDATEFAIL);
         IssueTypeService.IssueTypeResult result = _issueTypeService.createIssueType(_user, validationResult);
         if (result == null)
-            return null;
+            throw new Exception(UtilConstaints.ERROR_ISSUETYPE_CRETEFAIL);
         return result.getIssueType();
     }
 
     @Override
-    public Issue create(String userName, IssueInputParameters params) {
+    public Issue create(IssueInputParameters params) throws Exception {
         if(params==null)
-            return null;
+            throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
         IssueService.CreateValidationResult validationResult = _issueService.validateCreate(_user, params);
         if(!validationResult.isValid())
-            return null;
+            throw new Exception(UtilConstaints.ERROR_ISSUE_CREATEVALIDATEFAIL);
         IssueService.IssueResult result = _issueService.create(_user, validationResult);
         return result.isValid() ? result.getIssue() : null;
     }
 
     @Override
-    public IssueType updateIssueType(IssueType issueType, String name, String description, Long avatarId) {
+    public IssueType updateIssueType(IssueType issueType, String name, String description, Long avatarId) throws Exception {
         IssueTypeService.IssueTypeUpdateInput.Builder updateBuilder = IssueTypeService.IssueTypeUpdateInput.builder();
         if(name!=null)
             updateBuilder.setName(name);
@@ -137,7 +131,7 @@ public class IssueUtils implements IIssueUtils {
         updateBuilder.setIssueTypeToUpdateId(Long.parseLong(issueType.getId()));
         IssueTypeService.UpdateValidationResult validationResult = _issueTypeService.validateUpdateIssueType(_user, issueType.getId(), updateBuilder.build());
         if(!validationResult.isValid())
-            return null;
+            throw new Exception(UtilConstaints.ERROR_ISSUETYPE_UPDATEVALIDATEFAIL);
         IssueTypeService.IssueTypeResult result = _issueTypeService.updateIssueType(_user, validationResult);
         return result.getIssueType();
     }
@@ -162,12 +156,12 @@ public class IssueUtils implements IIssueUtils {
     }
 
     @Override
-    public Issue update(String userName, Long issueId, IssueInputParameters params) {
+    public Issue update(String userName, Long issueId, IssueInputParameters params) throws Exception {
         if(params == null)
             return null;
         IssueService.UpdateValidationResult validationResult = _issueService.validateUpdate(_user, issueId, params);
         if(!validationResult.isValid())
-            return null;
+            throw new Exception(UtilConstaints.ERROR_ISSUE_UPDATEVALIDATEFAIL);
         IssueService.IssueResult result = _issueService.update(_user, validationResult);
         return result.isValid() ? result.getIssue() : null;
     }

@@ -22,19 +22,19 @@ public interface IIssueUtils {
 
     Collection<IssueType> getAllIssueType();
 
-    FieldConfigScheme AddIssueTypeSchemeToProject(FieldConfigScheme scheme, Project project);
+    FieldConfigScheme AddIssueTypeSchemeToProject(FieldConfigScheme scheme, Project project) throws Exception;
 
-    IssueType createIssueType(String name, String description, Long avatarId, IssueTypeService.IssueTypeCreateInput.Type type);
+    IssueType createIssueType(String name, String description, Long avatarId, IssueTypeService.IssueTypeCreateInput.Type type) throws Exception;
 
-    Issue create(String userName, IssueInputParameters params);
+    Issue create(IssueInputParameters params) throws Exception;
 
-    IssueType updateIssueType(IssueType issueType, String name, String description, Long avatarId);
+    IssueType updateIssueType(IssueType issueType, String name, String description, Long avatarId) throws Exception;
 
     FieldConfigScheme createIssueTypeScheme(String schemeName, String schemeDescription, List<String> optionIDs);
 
     Boolean deleteIssueType(String typeId);
 
-    Issue update(String userName, Long issueId, IssueInputParameters params);
+    Issue update(String userName, Long issueId, IssueInputParameters params) throws Exception;
 
     Boolean delete(Long issueId);
 

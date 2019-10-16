@@ -13,15 +13,15 @@ public interface IScreenUtils {
 
     List<FieldScreenTab> getAllScreenTab();
 
-    FieldScreenTab createScreenTab(FieldScreen screen, String name, List<String> listOfField);
+    FieldScreenTab createScreenTab(FieldScreen screen, String name, List<String> listOfField) throws Exception;
 
-    FieldScreenSchemeItem createSchemeItem(FieldScreen screen, FieldScreenScheme scheme, ScreenableIssueOperation operation);
+    FieldScreenSchemeItem createSchemeItem(FieldScreen screen, FieldScreenScheme scheme, ScreenableIssueOperation operation) throws Exception;
 
-    FieldScreenScheme createScreenScheme(String name, String description);
+    FieldScreenScheme createScreenScheme(String name, String description) throws Exception;
 
-    FieldScreen createFieldScreen(String name, String description);
+    FieldScreen createFieldScreen(String name, String description) throws Exception;
 
-    IssueTypeScreenScheme createIssueScreenScheme(String name, String description);
+    IssueTypeScreenScheme createIssueScreenScheme(String name, String description) throws Exception;
 
     IssueTypeScreenSchemeEntity createIssueScreenSchemeEntity(IssueTypeScreenScheme issueTypeScreenScheme, FieldScreenScheme screenScheme, String issueTypeId);
 

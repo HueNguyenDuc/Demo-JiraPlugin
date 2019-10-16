@@ -5,22 +5,17 @@ import com.atlassian.jira.config.IssueTypeManager;
 import com.atlassian.jira.issue.issuetype.IssueType;
 import com.atlassian.jira.project.Project;
 import com.atlassian.jira.scheme.Scheme;
-import com.atlassian.jira.security.JiraAuthenticationContext;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.user.util.UserManager;
 import com.atlassian.jira.workflow.*;
 import com.atlassian.plugin.PluginAccessor;
 import com.atlassian.plugin.spring.scanner.annotation.export.ExportAsService;
-import com.atlassian.plugin.spring.scanner.annotation.imports.JiraImport;
 import com.opensymphony.workflow.loader.WorkflowDescriptor;
 import com.opensymphony.workflow.loader.WorkflowLoader;
-import org.ofbiz.core.entity.GenericEntityException;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Stream;
 
 @ExportAsService({IWorkflowUtils.class})
@@ -69,7 +64,7 @@ public class WorkflowUtils implements IWorkflowUtils {
     @Override
     public AssignableWorkflowScheme createWorkflowScheme(String name, String description, JiraWorkflow workflow) throws Exception {
         if(workflow == null)
-            throw new Exception(UtilConstaints.ERROR_WORKFLOWNOTFOUND);
+            throw new Exception(UtilConstaints.ERROR_WORKFLOW_NOTFOUND);
         AssignableWorkflowScheme.Builder newScheme = _workflowSchemeManager.assignableBuilder();
         newScheme.setName(name);
         if(description != null)

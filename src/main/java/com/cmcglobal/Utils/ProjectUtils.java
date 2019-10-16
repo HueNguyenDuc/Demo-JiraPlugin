@@ -41,14 +41,23 @@ public class ProjectUtils implements IProjectUtils {
     }
 
     @Override
-    public Project create(String name, String userNameOfLead, String key, String description, ProjectTypeKey projectTypeKey, Long assigneeTypeId, Long avatarId, String url) {
+    public Project create(
+            String name,
+            String userNameOfLead,
+            String key,
+            String description,
+            ProjectTypeKey projectTypeKey,
+            Long assigneeTypeId,
+            Long avatarId,
+            String url) throws Exception {
         if(name == null ||
-                key == null)
-            return null;
+                key == null||
+                userNameOfLead == null)
+            throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
         Project existsProject = _projectManager.getProjectObjByName(name);
         ApplicationUser user = _userManager.getUserByName(userNameOfLead);
         if(user == null)
-            return null;
+            throw new Exception(UtilConstaints.ERROR_USERNOTFOUND);
         if(existsProject != null)
             return existsProject;
         ProjectCreationData.Builder newProjectBuilder = new ProjectCreationData.Builder();
@@ -67,15 +76,15 @@ public class ProjectUtils implements IProjectUtils {
         ProjectCreationData newProject = newProjectBuilder.build();
         ProjectService.CreateProjectValidationResult validationResult = _projectService.validateCreateProject(_user, newProject);
         if(!validationResult.isValid())
-            return null;
+            throw new Exception(UtilConstaints.ERROR_PROJECT_CREATEVALIDATEFAIL);
         return _projectService.createProject(validationResult);
     }
 
     @Override
-    public Boolean delete(String key) {
+    public Boolean delete(String key) throws Exception {
         ProjectService.DeleteProjectValidationResult validationResult = _projectService.validateDeleteProject(_user, key);
         if(!validationResult.isValid())
-            return null;
+            throw new Exception(UtilConstaints.ERROR_PROJECT_DELETEVALIDATEFAIL);
         ProjectService.DeleteProjectResult ret = _projectService.deleteProject(_user, validationResult);
         if(ret.isValid())
             return true;
@@ -88,7 +97,7 @@ public class ProjectUtils implements IProjectUtils {
     }
 
     @Override
-    public Project update(Project oldProject, String name, String userNameOfLead, String key, String description, String url, Long assigneeType) {
+    public Project update(Project oldProject, String name, String userNameOfLead, String key, String description, String url, Long assigneeType) throws Exception {
         if(oldProject==null)
             return null;
         ProjectService.UpdateProjectRequest updateRequest = new ProjectService.UpdateProjectRequest(oldProject);
@@ -97,7 +106,7 @@ public class ProjectUtils implements IProjectUtils {
         if(userNameOfLead!= null) {
             ApplicationUser lead = _userManager.getUserByName(userNameOfLead);
             if(lead == null)
-                return null;
+                throw new Exception(UtilConstaints.ERROR_USERNOTFOUND);
             updateRequest.leadUserKey(lead.getKey());
         }
         if(key!=null)
@@ -110,7 +119,7 @@ public class ProjectUtils implements IProjectUtils {
             updateRequest.assigneeType(assigneeType);
         ProjectService.UpdateProjectValidationResult validationResult = _projectService.validateUpdateProject(_user, updateRequest);
         if(!validationResult.isValid())
-            return null;
+            throw new Exception(UtilConstaints.ERROR_PROJECT_UPDATEVALIDATEFAIL);
         return _projectService.updateProject(validationResult);
     }
 }

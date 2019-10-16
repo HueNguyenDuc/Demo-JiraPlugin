@@ -17,9 +17,9 @@ public interface IProjectUtils {
                    ProjectTypeKey projectTypeKey,
                    @Nullable Long assigneeTypeId,
                    @Nullable Long avatarId,
-                   @Nullable String url);
+                   @Nullable String url) throws Exception;
 
-    Boolean delete(String key);
+    Boolean delete(String key) throws Exception;
 
     List<ProjectType> getAllProjectType();
 
@@ -29,5 +29,5 @@ public interface IProjectUtils {
                    @Nullable String key,
                    @Nullable String description,
                    @Nullable String url,
-                   @Nullable Long assigneeType);
+                   @Nullable Long assigneeType) throws Exception;
 }

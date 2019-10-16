@@ -49,9 +49,10 @@ public class ScreenUtils implements IScreenUtils {
     }
 
     @Override
-    public FieldScreenTab createScreenTab(FieldScreen screen, String name, List<String> listOfField) {
-        if (name == null)
-            return null;
+    public FieldScreenTab createScreenTab(FieldScreen screen, String name, List<String> listOfField) throws Exception {
+        if (name == null ||
+                screen==null)
+            throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
         Stream<FieldScreenTab> existsScreenTabs = _fieldScreenManager.getFieldScreenTabs(screen).stream().filter(e -> e.getName().equals(name));
         if(existsScreenTabs != null && existsScreenTabs.count() > 0)
             return _fieldScreenManager.getFieldScreenTabs(screen).stream().filter(e -> e.getName().equals(name)).findFirst().get();
@@ -65,7 +66,11 @@ public class ScreenUtils implements IScreenUtils {
     }
 
     @Override
-    public FieldScreenSchemeItem createSchemeItem(FieldScreen screen, FieldScreenScheme scheme, ScreenableIssueOperation operation) {
+    public FieldScreenSchemeItem createSchemeItem(FieldScreen screen, FieldScreenScheme scheme, ScreenableIssueOperation operation) throws Exception {
+        if(scheme==null||
+                scheme==null||
+                operation==null)
+            throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
         FieldScreenSchemeItem newSchemeItem = new FieldScreenSchemeItemImpl(_fieldScreenSchemeManager, _fieldScreenManager);
         newSchemeItem.setFieldScreen(screen);
         if (scheme != null)
@@ -77,9 +82,9 @@ public class ScreenUtils implements IScreenUtils {
     }
 
     @Override
-    public FieldScreenScheme createScreenScheme(String name, String description) {
+    public FieldScreenScheme createScreenScheme(String name, String description) throws Exception {
         if(name == null)
-            return null;
+            throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
         Stream<FieldScreenScheme> existsSchemes = _fieldScreenSchemeManager.getFieldScreenSchemes().stream().filter(e -> e.getName().equals(name));
         if(existsSchemes!= null && existsSchemes.count() > 0)
             return _fieldScreenSchemeManager.getFieldScreenSchemes().stream().filter(e -> e.getName().equals(name)).findFirst().get();
@@ -92,9 +97,9 @@ public class ScreenUtils implements IScreenUtils {
     }
 
     @Override
-    public FieldScreen createFieldScreen(String name, String description) {
+    public FieldScreen createFieldScreen(String name, String description) throws Exception {
         if(name==null)
-            return null;
+            throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
         Stream<FieldScreen> existsScreen = _fieldScreenManager.getFieldScreens().stream().filter(e -> e.getName().equals(name));
         if(existsScreen!=null && existsScreen.count() > 0)
             return _fieldScreenManager.getFieldScreens().stream().filter(e -> e.getName().equals(name)).findFirst().get();
@@ -107,9 +112,9 @@ public class ScreenUtils implements IScreenUtils {
     }
 
     @Override
-    public IssueTypeScreenScheme createIssueScreenScheme(String name, String description) {
+    public IssueTypeScreenScheme createIssueScreenScheme(String name, String description) throws Exception {
         if(name==null)
-            return null;
+            throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
         Stream<IssueTypeScreenScheme> existsTypeScreen = _issueTypeScreenSchemeManager.getIssueTypeScreenSchemes().stream().filter(e -> e.getName().equals(name));
         if(existsTypeScreen!=null &&existsTypeScreen.count() > 0)
             return _issueTypeScreenSchemeManager.getIssueTypeScreenSchemes().stream().filter(e -> e.getName().equals(name)).findFirst().get();

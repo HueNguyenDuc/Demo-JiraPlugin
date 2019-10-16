@@ -15,9 +15,9 @@ public interface ICustomFieldUtils {
                        CustomFieldType<?,?> customFieldType,
                        List<String> optionsForMultiSelect,
                        List<Long> projectId,
-                       Boolean isGlobal);
+                       Boolean isGlobal) throws Exception;
 
-    CustomField update(Long customFieldId, String name, String description, CustomFieldSearcher searcher);
+    CustomField update(Long customFieldId, String name, String description, CustomFieldSearcher searcher) throws Exception;
 
     Boolean delete(Long customFieldId);
 
