@@ -74,6 +74,7 @@ public class CustomFieldUtils implements ICustomFieldUtils {
         if(name == null ||
                 customFieldType == null)
             return null;
+            //throw new Exception("")
         Collection<CustomField> existsFields = _customFieldManager.getCustomFieldObjectsByName(name);
         if(existsFields!=null && existsFields.size() > 0)
             return existsFields.stream().findFirst().get();
@@ -119,10 +120,10 @@ public class CustomFieldUtils implements ICustomFieldUtils {
     @Override
     public Boolean delete(Long customFieldId) {
         JiraServiceContext jiraServiceContext = new JiraServiceContextImpl(_user);
-        if(jiraServiceContext.getErrorCollection().hasAnyErrors())
+        if (jiraServiceContext.getErrorCollection().hasAnyErrors())
             return false;
         CustomField removeItem = _customFieldManager.getCustomFieldObject(customFieldId);
-        if(removeItem==null)
+        if (removeItem == null)
             return false;
         try {
             _customFieldManager.removeCustomField(removeItem);

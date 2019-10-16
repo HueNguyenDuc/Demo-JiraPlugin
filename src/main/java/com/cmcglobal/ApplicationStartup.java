@@ -1,6 +1,7 @@
 package com.cmcglobal;
 
 
+import com.atlassian.jira.issue.IssueFieldConstants;
 import com.atlassian.jira.issue.customfields.CustomFieldType;
 import com.atlassian.jira.issue.fields.CustomField;
 import com.atlassian.jira.issue.fields.NavigableField;
@@ -74,7 +75,6 @@ public class ApplicationStartup implements InitializingBean, DisposableBean
     private void Init() throws Exception {
         //CustomField
         ArrayList<String> listOfSystemField = new ArrayList<>();
-        Collection<NavigableField> systemFields = _iCustomFieldUtils.getAllSystemField();
         List<CustomFieldType<?, ?>> customFieldTypes = _iCustomFieldUtils.getAllCustomFieldType();
 
         //create custom field
@@ -87,13 +87,13 @@ public class ApplicationStartup implements InitializingBean, DisposableBean
                 true);
         _iCustomFieldUtils.lockCustomField(involvedMenbers);
 
-        listOfSystemField.add(systemFields.stream().filter(e->e.getId().contains("issuetype")).findFirst().get().getId());
-        listOfSystemField.add(systemFields.stream().filter(e->e.getId().contains("summary")).findFirst().get().getId());
-        listOfSystemField.add(systemFields.stream().filter(e->e.getId().contains("description")).findFirst().get().getId());
-        listOfSystemField.add(systemFields.stream().filter(e->e.getId().contains("components")).findFirst().get().getId());
-        listOfSystemField.add(systemFields.stream().filter(e->e.getId().contains("priority")).findFirst().get().getId());
-        listOfSystemField.add(systemFields.stream().filter(e->e.getId().contains("duedate")).findFirst().get().getId());
-        listOfSystemField.add(systemFields.stream().filter(e->e.getId().contains("security")).findFirst().get().getId());
+        listOfSystemField.add(IssueFieldConstants.ISSUE_TYPE);
+        listOfSystemField.add(IssueFieldConstants.SUMMARY);
+        listOfSystemField.add(IssueFieldConstants.DESCRIPTION);
+        listOfSystemField.add(IssueFieldConstants.ATTACHMENT);
+        listOfSystemField.add(IssueFieldConstants.PRIORITY);
+        listOfSystemField.add(IssueFieldConstants.DUE_DATE);
+        listOfSystemField.add(IssueFieldConstants.SECURITY);
         listOfSystemField.add(involvedMenbers.getId());
 
         //create screen
