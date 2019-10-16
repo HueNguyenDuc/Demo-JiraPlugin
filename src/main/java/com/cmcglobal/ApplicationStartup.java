@@ -1,50 +1,29 @@
 package com.cmcglobal;
 
-import com.atlassian.jira.bc.project.ProjectCreationData;
-import com.atlassian.jira.bc.project.ProjectService;
-import com.atlassian.jira.bc.security.login.LoginResult;
-import com.atlassian.jira.bc.security.login.LoginService;
-import com.atlassian.jira.bc.user.ApplicationUserBuilder;
-import com.atlassian.jira.bc.user.ApplicationUserBuilderImpl;
-import com.atlassian.jira.component.ComponentAccessor;
-import com.atlassian.jira.config.IssueTypeManager;
-import com.atlassian.jira.config.IssueTypeService;
-import com.atlassian.jira.issue.CustomFieldManager;
+
 import com.atlassian.jira.issue.customfields.CustomFieldType;
 import com.atlassian.jira.issue.fields.CustomField;
-import com.atlassian.jira.issue.fields.FieldException;
-import com.atlassian.jira.issue.fields.FieldManager;
 import com.atlassian.jira.issue.fields.NavigableField;
 import com.atlassian.jira.issue.fields.config.FieldConfigScheme;
 import com.atlassian.jira.issue.fields.screen.*;
 import com.atlassian.jira.issue.fields.screen.issuetype.IssueTypeScreenScheme;
 import com.atlassian.jira.issue.fields.screen.issuetype.IssueTypeScreenSchemeEntity;
-import com.atlassian.jira.issue.issuetype.IssueType;
 import com.atlassian.jira.issue.operation.ScreenableIssueOperation;
 import com.atlassian.jira.project.Project;
-import com.atlassian.jira.project.type.ProjectType;
-import com.atlassian.jira.security.JiraAuthenticationContext;
-import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.workflow.AssignableWorkflowScheme;
 import com.atlassian.jira.workflow.JiraWorkflow;
 import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
 import com.atlassian.plugin.spring.scanner.annotation.export.ExportAsService;
-import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
-import com.atlassian.plugin.spring.scanner.annotation.imports.JiraImport;
 import com.cmcglobal.Utils.*;
 import org.apache.log4j.Logger;
-import org.ofbiz.core.entity.GenericEntityException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
-import com.atlassian.crowd.embedded.api.User.*;
 
 import javax.inject.Inject;
-import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @Scanned
 @ExportAsService({ApplicationStartup.class})
@@ -74,17 +53,22 @@ public class ApplicationStartup implements InitializingBean, DisposableBean
     }
 
     @Override
-    public void destroy() throws Exception {
+    public void destroy() {
         // remove custom field
 
     }
 
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         // create custome fields
         //importWorkflow();
-        Init();
+        try {
+            Init();
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 
     private void Init() throws Exception {
@@ -101,6 +85,7 @@ public class ApplicationStartup implements InitializingBean, DisposableBean
                 null,
                 null,
                 true);
+        _iCustomFieldUtils.lockCustomField(involvedMenbers);
 
         listOfSystemField.add(systemFields.stream().filter(e->e.getId().contains("issuetype")).findFirst().get().getId());
         listOfSystemField.add(systemFields.stream().filter(e->e.getId().contains("summary")).findFirst().get().getId());

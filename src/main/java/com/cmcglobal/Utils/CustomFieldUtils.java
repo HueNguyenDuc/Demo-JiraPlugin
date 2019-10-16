@@ -7,6 +7,10 @@ import com.atlassian.jira.bc.customfield.CreateValidationResult;
 import com.atlassian.jira.bc.customfield.CustomFieldDefinition;
 import com.atlassian.jira.bc.customfield.CustomFieldService;
 import com.atlassian.jira.component.ComponentAccessor;
+import com.atlassian.jira.config.managedconfiguration.ConfigurationItemAccessLevel;
+import com.atlassian.jira.config.managedconfiguration.ManagedConfigurationItem;
+import com.atlassian.jira.config.managedconfiguration.ManagedConfigurationItemBuilder;
+import com.atlassian.jira.config.managedconfiguration.ManagedConfigurationItemService;
 import com.atlassian.jira.exception.RemoveException;
 import com.atlassian.jira.issue.CustomFieldManager;
 import com.atlassian.jira.issue.context.GlobalIssueContext;
@@ -137,6 +141,21 @@ public class CustomFieldUtils implements ICustomFieldUtils {
     @Override
     public Collection<NavigableField> getAllSystemField() {
         return _fieldManager.getNavigableFields();
+    }
+
+    @Override
+    public Boolean lockCustomField(CustomField fieldToLock) {
+        ManagedConfigurationItemService managedConfigurationItemService = ComponentAccessor.getComponent(ManagedConfigurationItemService.class);
+        ManagedConfigurationItem managedField = managedConfigurationItemService.getManagedCustomField( fieldToLock );
+        if ( managedField != null ) {
+            ManagedConfigurationItemBuilder builder = ManagedConfigurationItemBuilder.builder( managedField );
+            builder.setManaged( true );
+            builder.setConfigurationItemAccessLevel( ConfigurationItemAccessLevel.LOCKED );
+            managedField = builder.build();
+            managedConfigurationItemService.updateManagedConfigurationItem( managedField );
+            return true;
+        }
+        return false;
     }
 
     private void createOption(CustomField customField, List<String> option) {

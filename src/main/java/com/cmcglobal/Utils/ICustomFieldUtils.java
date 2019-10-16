@@ -24,4 +24,6 @@ public interface ICustomFieldUtils {
     List<CustomFieldType<?, ?>> getAllCustomFieldType();
 
     Collection<NavigableField> getAllSystemField();
+
+    Boolean lockCustomField(CustomField fieldToLock);
 }
