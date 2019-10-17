@@ -13,5 +13,5 @@ public interface IWorkflowUtils {
 
     void addWorkflowSchemeToProject(AssignableWorkflowScheme workflowScheme, Project project);
 
-    JiraWorkflow getWorkflowByName(String name);
+    JiraWorkflow getWorkflowByName(String name) throws Exception;
 }

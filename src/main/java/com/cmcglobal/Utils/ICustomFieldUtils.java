@@ -26,4 +26,6 @@ public interface ICustomFieldUtils {
     Collection<NavigableField> getAllSystemField();
 
     Boolean lockCustomField(CustomField fieldToLock);
+
+    CustomField getCustomFieldByName(String name) throws Exception;
 }

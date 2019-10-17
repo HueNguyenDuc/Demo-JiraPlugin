@@ -11,6 +11,8 @@ import com.atlassian.jira.user.util.UserManager;
 import com.atlassian.plugin.spring.scanner.annotation.export.ExportAsService;
 import com.atlassian.plugin.spring.scanner.annotation.imports.JiraImport;
 import org.apache.commons.compress.archivers.zip.X7875_NewUnix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sun.awt.AWTAccessor;
 
 import javax.inject.Inject;
@@ -23,6 +25,7 @@ import java.util.stream.Stream;
 @ExportAsService({IScreenUtils.class})
 @Named
 public class ScreenUtils implements IScreenUtils {
+    private static final Logger log = LoggerFactory.getLogger(ScreenUtils.class);
 
     private FieldScreenManager _fieldScreenManager;
     private FieldScreenSchemeManager _fieldScreenSchemeManager;
@@ -62,6 +65,7 @@ public class ScreenUtils implements IScreenUtils {
         _fieldScreenManager.createFieldScreenTab(newTab);
         if(listOfField != null && listOfField.size() > 0)
             listOfField.forEach(e -> addFieldToScreenTab(newTab, e));
+        log.info("Create SreenTab: %d -- %s For Screen: %d -- %s Successful.", newTab.getId(), newTab.getName(), screen.getId(), screen.getName());
         return newTab;
     }
 
@@ -78,6 +82,14 @@ public class ScreenUtils implements IScreenUtils {
         if (operation != null)
             newSchemeItem.setIssueOperation(operation);
         _fieldScreenSchemeManager.createFieldScreenSchemeItem(newSchemeItem);
+        log.info("Create Scheme Item: %d For \n Screen: %d -- %s\n Screen Scheme: %d -- %s \n With Operation: %s",
+                newSchemeItem.getId(),
+                screen.getId(),
+                screen.getName(),
+                scheme.getId(),
+                scheme.getName(),
+                operation.getNameKey()
+        );
         return newSchemeItem;
     }
 
@@ -93,6 +105,7 @@ public class ScreenUtils implements IScreenUtils {
         if(description!=null)
             newScheme.setDescription(description);
         _fieldScreenSchemeManager.createFieldScreenScheme(newScheme);
+        log.info(UtilConstaints.CREATE_SUCCESS_FORMAT, "Scheme", newScheme.getId().toString(), newScheme.getName());
         return newScheme;
     }
 
@@ -108,6 +121,7 @@ public class ScreenUtils implements IScreenUtils {
         if(description!=null)
             newScreen.setDescription(description);
         _fieldScreenManager.createFieldScreen(newScreen);
+        log.info(UtilConstaints.CREATE_SUCCESS_FORMAT, "Screen", newScreen.getId().toString(), newScreen.getName());
         return newScreen;
     }
 
@@ -123,6 +137,7 @@ public class ScreenUtils implements IScreenUtils {
         if(description!=null)
             newTypeScheme.setDescription(description);
         _issueTypeScreenSchemeManager.createIssueTypeScreenScheme(newTypeScheme);
+        log.info(UtilConstaints.CREATE_SUCCESS_FORMAT, "Screen Scheme", newTypeScheme.getId().toString(), newTypeScheme.getName());
         return newTypeScheme;
     }
 
@@ -144,6 +159,7 @@ public class ScreenUtils implements IScreenUtils {
         schemeEntity.setFieldScreenScheme(screenScheme);
         schemeEntity.setIssueTypeScreenScheme(issueTypeScreenScheme);
         _issueTypeScreenSchemeManager.createIssueTypeScreenSchemeEntity(schemeEntity);
+        log.info(UtilConstaints.CREATE_SUCCESS_FORMAT, "Screen Scheme Entity", schemeEntity.getId().toString(), screenScheme.getName());
         return schemeEntity;
     }
 
@@ -160,6 +176,7 @@ public class ScreenUtils implements IScreenUtils {
         FieldScreenLayoutItem addLayout = _fieldScreenManager.buildNewFieldScreenLayoutItem(systemFieldId);
         addLayout.setFieldScreenTab(fieldScreenTab);
         _fieldScreenManager.createFieldScreenLayoutItem(addLayout);
+        log.info(UtilConstaints.CREATE_SUCCESS_FORMAT, "Tab Layout", addLayout.getId().toString(), fieldScreenTab.getName());
         return addLayout;
     }
 }

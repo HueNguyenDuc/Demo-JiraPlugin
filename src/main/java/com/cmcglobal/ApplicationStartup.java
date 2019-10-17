@@ -9,6 +9,7 @@ import com.atlassian.jira.issue.fields.config.FieldConfigScheme;
 import com.atlassian.jira.issue.fields.screen.*;
 import com.atlassian.jira.issue.fields.screen.issuetype.IssueTypeScreenScheme;
 import com.atlassian.jira.issue.fields.screen.issuetype.IssueTypeScreenSchemeEntity;
+import com.atlassian.jira.issue.issuetype.IssueType;
 import com.atlassian.jira.issue.operation.ScreenableIssueOperation;
 import com.atlassian.jira.project.Project;
 import com.atlassian.jira.workflow.AssignableWorkflowScheme;
@@ -73,6 +74,10 @@ public class ApplicationStartup implements InitializingBean, DisposableBean
     }
 
     private void Init() throws Exception {
+
+        //get workflow
+        JiraWorkflow workflow = _iWorkflowUtils.getWorkflowByName("Global Ssc Wf Ver5");
+
         //CustomField
         ArrayList<String> listOfSystemField = new ArrayList<>();
         List<CustomFieldType<?, ?>> customFieldTypes = _iCustomFieldUtils.getAllCustomFieldType();
@@ -118,15 +123,23 @@ public class ApplicationStartup implements InitializingBean, DisposableBean
         IssueTypeScreenSchemeEntity issueScreenSchemeEntity = _iScreenUtils.createIssueScreenSchemeEntity(issueTypeScreenScheme, scheme, null);
 
         //create project and assign to issue scheme
-        Project newProject = _iProjectUtils.create("FIS GR Project", "admin", "FISGR", "Description of FIS GR Project", _iProjectUtils.getAllProjectType().get(0).getKey(), null, null, null);
+        Project newProject = _iProjectUtils.create(
+                "FIS GR Project",
+                "admin",
+                "FISGR",
+                "Description of FIS GR Project",
+                _iProjectUtils.getAllProjectType().get(0).getKey(),
+                null,
+                null,
+                null);
         _iScreenUtils.addIssueTypeScreenToProject(issueTypeScreenScheme, newProject);
 
         //create Issue Type scheme
+        IssueType fisGenRequest = _iIssueUtils.createIssueType("FIS General Request", "Description of FIS General Request", null, _iIssueUtils.STANDARD());
         ArrayList<String> listOfType = new ArrayList<>();
         _iIssueUtils.getAllIssueType().forEach(e -> listOfType.add(e.getId()));
         FieldConfigScheme projectScheme = _iIssueUtils.createIssueTypeScheme("FIS Scheme of project", "Description of FIS", listOfType);
         _iIssueUtils.AddIssueTypeSchemeToProject(projectScheme, newProject);
-        JiraWorkflow workflow = _iWorkflowUtils.getWorkflowByName("Global Ssc Wf Ver5");
         AssignableWorkflowScheme rzz = _iWorkflowUtils.createWorkflowScheme("Global Ssc Wf Ver5 Scheme", "Description Global Ssc Wf Ver5", workflow);
         _iWorkflowUtils.addWorkflowSchemeToProject(rzz, newProject);
     }

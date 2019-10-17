@@ -17,6 +17,8 @@ import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.user.util.UserManager;
 import com.atlassian.plugin.spring.scanner.annotation.export.ExportAsService;
 import com.atlassian.plugin.spring.scanner.annotation.imports.JiraImport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -25,6 +27,7 @@ import java.util.List;
 @ExportAsService({IProjectUtils.class})
 @Named
 public class ProjectUtils implements IProjectUtils {
+    private static final Logger log = LoggerFactory.getLogger(ProjectUtils.class);
 
     private ProjectManager _projectManager;
     private ProjectService _projectService;
@@ -75,16 +78,22 @@ public class ProjectUtils implements IProjectUtils {
             newProjectBuilder.withDescription(description);
         ProjectCreationData newProject = newProjectBuilder.build();
         ProjectService.CreateProjectValidationResult validationResult = _projectService.validateCreateProject(_user, newProject);
-        if(!validationResult.isValid())
+        if(!validationResult.isValid()) {
+            validationResult.getErrorCollection().getErrorMessages().forEach(e->log.error(e));
             throw new Exception(UtilConstaints.ERROR_PROJECT_CREATEVALIDATEFAIL);
-        return _projectService.createProject(validationResult);
+        }
+        Project ret = _projectService.createProject(validationResult);
+        log.info("Create project: %s -- %s Successful.", ret.getKey(), ret.getName());
+        return ret;
     }
 
     @Override
     public Boolean delete(String key) throws Exception {
         ProjectService.DeleteProjectValidationResult validationResult = _projectService.validateDeleteProject(_user, key);
-        if(!validationResult.isValid())
+        if(!validationResult.isValid()) {
+            validationResult.getErrorCollection().getErrorMessages().forEach(e->log.error(e));
             throw new Exception(UtilConstaints.ERROR_PROJECT_DELETEVALIDATEFAIL);
+        }
         ProjectService.DeleteProjectResult ret = _projectService.deleteProject(_user, validationResult);
         if(ret.isValid())
             return true;
@@ -99,7 +108,7 @@ public class ProjectUtils implements IProjectUtils {
     @Override
     public Project update(Project oldProject, String name, String userNameOfLead, String key, String description, String url, Long assigneeType) throws Exception {
         if(oldProject==null)
-            return null;
+            throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
         ProjectService.UpdateProjectRequest updateRequest = new ProjectService.UpdateProjectRequest(oldProject);
         if(name!=null)
             updateRequest.name(name);
@@ -118,8 +127,10 @@ public class ProjectUtils implements IProjectUtils {
         if(assigneeType!=null)
             updateRequest.assigneeType(assigneeType);
         ProjectService.UpdateProjectValidationResult validationResult = _projectService.validateUpdateProject(_user, updateRequest);
-        if(!validationResult.isValid())
+        if(!validationResult.isValid()){
+            validationResult.getErrorCollection().getErrorMessages().forEach(e->log.error(e));
             throw new Exception(UtilConstaints.ERROR_PROJECT_UPDATEVALIDATEFAIL);
+        }
         return _projectService.updateProject(validationResult);
     }
 }

@@ -12,6 +12,8 @@ import com.atlassian.plugin.PluginAccessor;
 import com.atlassian.plugin.spring.scanner.annotation.export.ExportAsService;
 import com.opensymphony.workflow.loader.WorkflowDescriptor;
 import com.opensymphony.workflow.loader.WorkflowLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import java.io.InputStream;
@@ -21,6 +23,7 @@ import java.util.stream.Stream;
 @ExportAsService({IWorkflowUtils.class})
 @Named
 public class WorkflowUtils implements IWorkflowUtils {
+    private static final Logger log = LoggerFactory.getLogger(WorkflowUtils.class);
 
     private PluginAccessor _pluginAccessor;
     private WorkflowManager _workflowManager;
@@ -72,7 +75,9 @@ public class WorkflowUtils implements IWorkflowUtils {
         newScheme.setDefaultWorkflow(workflow.getName());
         Collection<IssueType> issueTypes = _issueTypeManager.getIssueTypes();
         issueTypes.forEach(e -> newScheme.setMapping(e.getId(), workflow.getName()));
-        return _workflowSchemeManager.createScheme(newScheme.build());
+        AssignableWorkflowScheme ret = _workflowSchemeManager.createScheme(newScheme.build());
+        log.info(UtilConstaints.CREATE_SUCCESS_FORMAT, "Workflow Scheme", ret.getId().toString(), ret.getName());
+        return ret;
     }
 
     @Override
@@ -86,10 +91,10 @@ public class WorkflowUtils implements IWorkflowUtils {
     }
 
     @Override
-    public JiraWorkflow getWorkflowByName(String name) {
+    public JiraWorkflow getWorkflowByName(String name) throws Exception {
         Stream<JiraWorkflow> existsWorkflow = _workflowManager.getWorkflows().stream().filter(e -> e.getName().equals(name));
         if(existsWorkflow != null && existsWorkflow.count() > 0)
             return _workflowManager.getWorkflows().stream().filter(e -> e.getName().equals(name)).findFirst().get();
-        return null;
+        throw new Exception("Workflow doesn't exists.");
     }
 }

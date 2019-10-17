@@ -90,22 +90,27 @@ public class CustomFieldUtils implements ICustomFieldUtils {
             newCustomFieldBuilder.description(description);
         CustomFieldDefinition newCustomField = newCustomFieldBuilder.build();
         ServiceOutcome<CreateValidationResult> validationCreate = _customFieldService.validateCreate(_user, newCustomField);
-        if(!validationCreate.isValid())
+        if(!validationCreate.isValid()) {
+            log.error(UtilConstaints.ERROR_CUSTOMFIELD_CREATEVALIDATEFAIL);
             throw new Exception(UtilConstaints.ERROR_CUSTOMFIELD_CREATEVALIDATEFAIL);
+        }
         ServiceOutcome<CustomField> result = _customFieldService.create(validationCreate.get());
-        if(!result.isValid())
+        if(!result.isValid()) {
+            log.error(UtilConstaints.ERROR_CUSTOMFIELD_CREATEFAIL);
             throw new Exception(UtilConstaints.ERROR_CUSTOMFIELD_CREATEFAIL);
+        }
         CustomField ret = result.get();
         if((customFieldType.getKey().contains(UtilConstaints.MULTICHECKBOX_KEY) || customFieldType.getKey().contains(UtilConstaints.RADIOBUTTONS_KEY)) && optionsForMultiSelect != null){
             createOption(ret,optionsForMultiSelect);
         }
+        log.info(UtilConstaints.CREATE_SUCCESS_FORMAT, "CustomField", ret.getId(), ret.getName());
         return ret;
     }
 
     @Override
     public CustomField update(Long customFieldId, String name, String description, CustomFieldSearcher searcher) throws Exception {
         if(customFieldId < 1 ||
-        name == null)
+                name == null)
             throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
         CustomField oldField = _customFieldManager.getCustomFieldObject(customFieldId);
         if(name==null)
@@ -114,8 +119,7 @@ public class CustomFieldUtils implements ICustomFieldUtils {
             description = oldField.getDescription();
         _customFieldManager.updateCustomField(customFieldId, name, description, null);
         CustomField ret = _customFieldManager.getCustomFieldObject(customFieldId);
-        if(ret == null)
-            throw new Exception(UtilConstaints.ERROR_CUSTOMFIELD_UPDATEFAIL);
+        log.info(UtilConstaints.UPDATE_SUCCESS_FORMAT, "CustomField", ret.getId(), ret.getName());
         return ret;
     }
 
@@ -156,12 +160,26 @@ public class CustomFieldUtils implements ICustomFieldUtils {
             builder.setConfigurationItemAccessLevel( ConfigurationItemAccessLevel.LOCKED );
             managedField = builder.build();
             managedConfigurationItemService.updateManagedConfigurationItem( managedField );
+            log.info("Lock CustomField: %s -- %s Successfully.", fieldToLock.getId(), fieldToLock.getName());
             return true;
         }
         return false;
     }
 
-    private void createOption(CustomField customField, List<String> option) {
+    @Override
+    public CustomField getCustomFieldByName(String name) throws Exception {
+        if(name == null)
+            throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
+        Collection<CustomField> existsFields = _customFieldManager.getCustomFieldObjectsByName(name);
+        if(existsFields != null && existsFields.size() > 0)
+            return existsFields.stream().findFirst().get();
+        return null;
+    }
+
+    private void createOption(CustomField customField, List<String> option) throws Exception {
+        if(customField == null ||
+                option == null)
+            throw new Exception(UtilConstaints.ERROR_PARAMINPUTINVALID);
         FieldConfigSchemeManager fieldConfigSchemeManager =
                 ComponentAccessor.getComponent(FieldConfigSchemeManager.class);
         List<FieldConfigScheme> schemes =
